@@ -39,7 +39,7 @@ python manage.py runserver
 
 # ------------------------------------------------
 
-# 📌 Próximas melhorias
+# 📌 Próximas melhorias ( Em desenvolvimento )
 - 🔐 Autenticação de usuários (JWT)
 - 👤 Dados por usuário
 - 📄 Paginação
