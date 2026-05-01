@@ -1,11 +1,12 @@
 from rest_framework import viewsets
-from .models import Transaction
+from transactions.models import Transaction
 from .serializers import TransactionSerializer
 from django.db.models import Sum
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
+from .permissions import IsOwnerOnly
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
@@ -74,5 +75,9 @@ def saldo(request):
 
 class TransactionViewSet(ModelViewSet):
     queryset = Transaction.objects.all()
+    def get_queryset(self):
+        return Transaction.objects.filter(user=self.request.user)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
     serializer_class = TransactionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOnly]
