@@ -7,6 +7,8 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from .permissions import IsOwnerOnly
+from .models import Transaction
+from rest_framework.views import APIView
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
@@ -81,3 +83,21 @@ class TransactionViewSet(ModelViewSet):
         serializer.save(user=self.request.user)
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated, IsOwnerOnly]
+    
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None):
+        queryset = Transaction.objects.filter(user=request.user)
+        entradas = queryset.filter(tipo='entrada')
+        saidas = queryset.filter(tipo='saida')
+        
+        total_entradas = entradas.aggregate(Sum('valor'))['valor__sum'] or 0
+        total_saidas = saidas.aggregate(Sum('valor'))['valor__sum'] or 0
+        saldo_total = total_entradas - total_saidas
+        
+        return Response({
+            'total_entradas': total_entradas,
+            'total_saidas': total_saidas,
+            'saldo': saldo_total
+        })
+    
