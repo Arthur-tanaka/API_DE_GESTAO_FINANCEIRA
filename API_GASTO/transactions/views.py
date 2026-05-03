@@ -1,11 +1,13 @@
 from rest_framework import viewsets
-from .serializers import TransactionSerializer
-from django.db.models import Sum
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.filters import SearchFilter
+from .serializers import TransactionSerializer
+from django.db.models import Sum
 from .permissions import IsOwnerOnly
 from .models import Transaction
-from rest_framework.views import APIView
+
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
@@ -13,6 +15,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
     permission_classes = [IsAuthenticated, IsOwnerOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ['nome']
     
     def get_queryset(self):
         queryset = Transaction.objects.filter(user=self.request.user)
