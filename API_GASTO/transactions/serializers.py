@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction
+from .models import Transaction, Category
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -21,3 +21,14 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = '__all__'
         read_only_fields = ['user']
+        
+class CategorySerializer(serializers.ModelSerializer):
+    nome = serializers.CharField(min_length=3, error_messages={
+        'min_length': 'O nome deve ter pelo menos 3 caracteres.',
+        'blank': 'O nome não pode estar vazio.'
+    })
+    class Meta:
+        model = Category
+        read_only_fields = ['user']
+        fields = '__all__'
+        
