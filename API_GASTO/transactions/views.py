@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
-from .serializers import TransactionSerializer
+from .serializers import TransactionSerializer, CategorySerializer
 from django.db.models import Sum
 from .permissions import IsOwnerOnly
-from .models import Transaction
+from .models import Transaction, Category
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
@@ -58,3 +58,12 @@ class DashboardView(APIView):
             'total_saidas': total_saidas,
             'saldo': saldo_total
         })
+        
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    permission_classes = [IsAuthenticated, IsOwnerOnly]
