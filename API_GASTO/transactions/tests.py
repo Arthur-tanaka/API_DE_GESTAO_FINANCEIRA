@@ -67,4 +67,18 @@ class TransactionTests(APITestCase):
         response = self.client.get('/api/transactions/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 0)
-    
+
+class DashboardTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.client.force_authenticate(user=self.user)
+        
+    #Teste de dashboard resumo mensal
+    def test_dashboard_resumo_mensal(self):
+        Transaction.objects.create(user=self.user, nome='Entrada 1', valor=100.00, data='2024-01-01', tipo='entrada')
+        Transaction.objects.create(user=self.user, nome='Saida 1', valor=50.00, data='2024-01-02', tipo='saida')
+        response = self.client.get('/api/dashboard/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['total_entradas'], float('100.0'))
+        self.assertEqual(response.data['total_saidas'], float('50.0'))
+        self.assertEqual(response.data['saldo'], float('50.0'))
