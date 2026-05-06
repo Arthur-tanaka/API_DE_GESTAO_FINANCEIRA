@@ -3,6 +3,9 @@
 API REST para controle de finanças pessoais desenvolvida com **Django + Django REST Framework**.  
 Permite registrar entradas e saídas, calcular saldo automaticamente, filtrar transações e visualizar resumos financeiros por período.
 
+🌐 **API em produção:** [https://api-de-gestao-financeira.onrender.com](https://api-de-gestao-financeira.onrender.com)  
+📖 **Documentação interativa:** [https://api-de-gestao-financeira.onrender.com/api/docs/](https://api-de-gestao-financeira.onrender.com/api/docs/)
+
 ---
 
 ## 🚀 Funcionalidades
@@ -10,7 +13,7 @@ Permite registrar entradas e saídas, calcular saldo automaticamente, filtrar tr
 ### 💳 Transações
 - Cadastro de entradas e saídas
 - Listagem, atualização e exclusão
-- Vinculação com categorias
+- Vinculação com categorias personalizadas
 
 ### 🔍 Filtros
 - Por tipo (`entrada` / `saida`)
@@ -26,24 +29,53 @@ Permite registrar entradas e saídas, calcular saldo automaticamente, filtrar tr
 
 ### 🏷️ Categorias
 - CRUD completo de categorias personalizadas por usuário
+- Validação de categoria por dono — usuários não acessam categorias de outros
 
 ### 🔐 Autenticação e Segurança
+- Registro de usuários via `/api/register/`
 - Autenticação via JWT
-- Isolamento de dados por usuário (multiusuário)
-- Proteção contra acesso a dados de outros usuários
+- Isolamento completo de dados por usuário (multiusuário)
+- Proteção contra acesso a dados de outros usuários (retorna 404)
+- Validação de data futura — transações com data futura são bloqueadas
 
 ### 📄 Paginação e Documentação
 - Paginação global nos endpoints
 - Documentação interativa via Swagger (`/api/docs/`)
+- Respostas de erro padronizadas com `status`, `mensagem` e `detalhes`
 
 ---
 
-## ⚙️ Como rodar o projeto
+## 🌐 Testando em Produção
+
+A API está disponível em produção. Para testar sem instalar nada:
+
+**1. Criar conta**
+```
+POST https://api-de-gestao-financeira.onrender.com/api/register/
+Body: { "username": "seu_usuario", "password": "sua_senha" }
+```
+
+**2. Fazer login e obter token**
+```
+POST https://api-de-gestao-financeira.onrender.com/api/token/
+Body: { "username": "seu_usuario", "password": "sua_senha" }
+```
+
+**3. Usar o token nas requisições**
+```
+Authorization: Bearer <token_recebido>
+```
+
+> ⚠️ A instância gratuita do Render pode demorar até 50 segundos para responder após período de inatividade.
+
+---
+
+## ⚙️ Como rodar localmente
 
 **1. Clonar o repositório**
 ```bash
-git clone https://github.com/Arthur-tanaka/API.git
-cd API
+git clone https://github.com/Arthur-tanaka/API_DE_GESTAO_FINANCEIRA.git
+cd API_DE_GESTAO_FINANCEIRA/API_GASTO
 ```
 
 **2. Criar e ativar ambiente virtual**
@@ -62,39 +94,43 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**4. Rodar migrações**
+**4. Configurar variáveis de ambiente**
+
+Cria um arquivo `.env` na pasta `API_GASTO` com:
+```
+SECRET_KEY=sua_secret_key
+DEBUG=True
+ALLOWED_HOSTS=localhost
+```
+
+**5. Rodar migrações**
 ```bash
 python manage.py migrate
 ```
 
-**5. Criar superusuário (opcional)**
+**6. Criar usuário**
 ```bash
 python manage.py createsuperuser
 ```
 
-**6. Iniciar servidor**
+**7. Iniciar servidor**
 ```bash
 python manage.py runserver
 ```
 
 ---
 
-## 📌 Endpoints Principais
+## 📌 Endpoints
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/api/token/` | Login e geração de token JWT |
-| GET/POST | `/api/transactions/` | Listar e criar transações |
-| GET/PUT/DELETE | `/api/transactions/{id}/` | Detalhar, atualizar e deletar |
-| GET/POST | `/api/categories/` | Listar e criar categorias |
-| GET | `/api/dashboard/` | Resumo financeiro |
-| GET | `/api/docs/` | Documentação Swagger |
-
-### 🔑 Autenticação
-Todas as rotas exigem token JWT no header:
-```
-Authorization: Bearer <seu_token>
-```
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| POST | `/api/register/` | Criar conta | ❌ |
+| POST | `/api/token/` | Login e geração de token JWT | ❌ |
+| GET/POST | `/api/transactions/` | Listar e criar transações | ✅ |
+| GET/PUT/DELETE | `/api/transactions/{id}/` | Detalhar, atualizar e deletar | ✅ |
+| GET/POST | `/api/categories/` | Listar e criar categorias | ✅ |
+| GET | `/api/dashboard/` | Resumo financeiro | ✅ |
+| GET | `/api/docs/` | Documentação Swagger | ❌ |
 
 ### 🔍 Exemplos de Filtros
 ```
@@ -104,11 +140,21 @@ GET /api/transactions/?data_inicio=2026-01-01&data_fim=2026-12-31
 GET /api/dashboard/?data_inicio=2026-01-01&data_fim=2026-05-31
 ```
 
+### 📦 Exemplo de Resposta Padronizada
+```json
+{
+  "status": 400,
+  "mensagem": "Requisição inválida",
+  "detalhes": {
+    "nome": ["O nome deve ter pelo menos 3 caracteres."]
+  }
+}
+```
+
 ---
 
 ## 🧪 Testes
 
-Para rodar os testes automatizados:
 ```bash
 python manage.py test transactions
 ```
@@ -118,6 +164,7 @@ Cobertura atual:
 - ✅ Autenticação e segurança
 - ✅ Isolamento de dados por usuário
 - ✅ Dashboard financeiro
+- ✅ Validação de data futura
 
 ---
 
@@ -128,7 +175,9 @@ Cobertura atual:
 - Django REST Framework
 - Simple JWT
 - drf-spectacular (Swagger)
-- SQLite (desenvolvimento)
+- PostgreSQL (produção) / SQLite (desenvolvimento)
+- Gunicorn
+- Render (deploy)
 
 ---
 
@@ -144,5 +193,8 @@ Este projeto cobre na prática:
 - Agregações com ORM Django (`Sum`)
 - Paginação global
 - Documentação automática com Swagger
+- Respostas de erro padronizadas com exception handler customizado
 - Testes automatizados com APITestCase
 - Controle de versão com Git e GitHub (branches e pull requests)
+- Deploy em produção com Render e PostgreSQL
+- Variáveis de ambiente com python-decouple
