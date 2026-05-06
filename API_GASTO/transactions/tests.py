@@ -67,6 +67,18 @@ class TransactionTests(APITestCase):
         response = self.client.get('/api/transactions/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 0)
+        
+    def test_nao_pode_criar_transacao_com_data_futura(self):
+        data = {
+            'nome': 'Future Transaction',
+            'valor': 100.00,
+            'data': '2028-05-08',
+            'tipo': 'entrada',
+        }
+        response = self.client.post('/api/transactions/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('data', response.data)
+        self.assertEqual(response.data['data'][0], 'A data não pode ser futura.')
 
 class DashboardTests(APITestCase):
     def setUp(self):

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Transaction, Category
+from datetime import date
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -15,8 +16,12 @@ class TransactionSerializer(serializers.ModelSerializer):
         error_messages={
             'invalid': 'Data invalida, use o formato correto: DIA / MÊS / ANO',
             'required': 'A data é obrigatória'
-        }
-    )
+    })
+    def validate_data(self, value):
+        if value > date.today():
+            raise serializers.ValidationError('A data não pode ser futura.')
+        return value
+    
     class Meta:
         model = Transaction
         fields = '__all__'
@@ -31,4 +36,3 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         read_only_fields = ['user']
         fields = '__all__'
-        
