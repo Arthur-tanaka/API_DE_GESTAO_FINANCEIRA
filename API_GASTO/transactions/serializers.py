@@ -17,6 +17,18 @@ class TransactionSerializer(serializers.ModelSerializer):
             'invalid': 'Data invalida, use o formato correto: DIA / MÊS / ANO',
             'required': 'A data é obrigatória'
     })
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), error_messages={
+        'invalid': 'Categoria inválida',
+        'required': 'A categoria é obrigatória',
+        'does_not_exist': 'Categoria não encontrada para o usuário atual'
+    })
+    def validate_category(self, value):
+        user = self.context['request'].user
+        if not Category.objects.filter(id=value.id, user=user).exists():
+            raise serializers.ValidationError('Categoria inválida para o usuário atual.')
+        return value
+    
+    
     def validate_data(self, value):
         if value > date.today():
             raise serializers.ValidationError('A data não pode ser futura.')
