@@ -3,7 +3,7 @@
 API REST para controle de finanças pessoais desenvolvida com **Django + Django REST Framework**.  
 Permite registrar entradas e saídas, calcular saldo automaticamente, filtrar transações e visualizar resumos financeiros por período.
 
-🌐 **API em produção:** [https://api-de-gestao-financeira.onrender.com](https://api-de-gestao-financeira.onrender.com)  
+🌐 **API em produção:** [https://api-de-gestao-financeira.onrender.com](https://api-de-gestao-financeira-1.onrender.com)  
 📖 **Documentação interativa:** [https://api-de-gestao-financeira.onrender.com/api/docs/](https://api-de-gestao-financeira.onrender.com/api/docs/)
 
 ---
