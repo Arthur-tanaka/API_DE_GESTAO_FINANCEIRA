@@ -75,53 +75,59 @@ Authorization: Bearer <token_recebido>
 **1. Clonar o repositório**
 ```bash
 git clone https://github.com/Arthur-tanaka/API_DE_GESTAO_FINANCEIRA.git
-cd API_DE_GESTAO_FINANCEIRA/API_GASTO
+cd API_DE_GESTAO_FINANCEIRA
 ```
 
-**2. Criar e ativar ambiente virtual**
+**2. Criar e ativar o ambiente virtual do backend**
+
+Execute os comandos dentro de `API_GASTO`. O projeto usa Python 3.14 para instalar
+as dependências listadas sem precisar compilá-las no Windows.
+
 ```bash
 # Windows
+cd API_GASTO
 py -3.14 -m venv .venv
-.venv\Scripts\activate
+.\.venv\Scripts\Activate.ps1
 
 # Linux/Mac
+cd API_GASTO
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 **3. Instalar dependências**
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 **4. Configurar variáveis de ambiente**
 
-Copie `API_GASTO/.env.example` para `API_GASTO/.env` e use uma chave secreta local:
-```
-SECRET_KEY=troque-por-uma-chave-secreta-local
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
+Ainda dentro de `API_GASTO`, copie `.env.example` para `.env` (`Copy-Item .env.example .env`
+no PowerShell ou `cp .env.example .env` no Linux/Mac). Mantenha `DEBUG=True` e
+`ALLOWED_HOSTS=localhost,127.0.0.1` para desenvolvimento local e substitua `SECRET_KEY`
+por uma chave aleatória. Gere uma com:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(50))"
 ```
 
-**5. Rodar migrações**
+**5. Preparar o banco de dados**
 ```bash
 python manage.py migrate
 ```
 
-**6. Criar usuário**
-```bash
-python manage.py createsuperuser
-```
-
-**7. Iniciar servidor**
+**6. Iniciar o backend**
 ```bash
 python manage.py runserver
 ```
 
-### 🖥️ Frontend
+O backend ficará disponível em `http://127.0.0.1:8000` e a documentação Swagger em
+`http://127.0.0.1:8000/api/docs/`. Para criar uma conta de administração opcional,
+execute `python manage.py createsuperuser`.
 
-O frontend React está na pasta `frontend/` e usa o proxy do Vite para acessar a API
-local. Com a API em execução, abra outro terminal na raiz do repositório:
+**7. Iniciar o frontend**
+
+Com o backend em execução, abra outro terminal na raiz do repositório:
 
 ```bash
 cd frontend
@@ -129,7 +135,8 @@ npm install
 npm run dev
 ```
 
-Abra o endereço indicado pelo Vite (normalmente `http://localhost:5173`). Para gerar
+Abra o endereço indicado pelo Vite (normalmente `http://localhost:5173`). O proxy
+local do frontend encaminha as chamadas `/api` para `http://127.0.0.1:8000`. Para gerar
 os arquivos de produção, execute `npm run build`; o resultado fica em `frontend/dist/`.
 Ao hospedar frontend e API em domínios diferentes, configure `VITE_API_BASE_URL` com
 a origem da API e habilite essa origem na política CORS do serviço da API.
