@@ -541,6 +541,7 @@ function App() {
         </div>
       </main>
       {transactionModal && <TransactionForm initial={transactionModal} categories={categories} onClose={() => setTransactionModal(null)} onSave={saveTransaction} />}
+      {categories.length === 0 && ( <div className="form-error" role="alert">  É necessário criar uma categoria na aba Categorias antes de registrar uma transação. </div>)}
       {categoryModal && <CategoryForm initial={categoryModal.id ? categoryModal : null} onClose={() => setCategoryModal(null)} onSave={saveCategory} />}
       {toast && <div className="toast" role="status"><span>✓</span>{toast}</div>}
     </div>
