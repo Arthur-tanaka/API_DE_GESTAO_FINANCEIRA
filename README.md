@@ -80,13 +80,13 @@ cd API_DE_GESTAO_FINANCEIRA/API_GASTO
 
 **2. Criar e ativar ambiente virtual**
 ```bash
-python -m venv venv
-
 # Windows
-venv\Scripts\activate
+py -3.14 -m venv .venv
+.venv\Scripts\activate
 
 # Linux/Mac
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 **3. Instalar dependências**
@@ -96,11 +96,11 @@ pip install -r requirements.txt
 
 **4. Configurar variáveis de ambiente**
 
-Cria um arquivo `.env` na pasta `API_GASTO` com:
+Copie `API_GASTO/.env.example` para `API_GASTO/.env` e use uma chave secreta local:
 ```
-SECRET_KEY=sua_secret_key
+SECRET_KEY=troque-por-uma-chave-secreta-local
 DEBUG=True
-ALLOWED_HOSTS=localhost
+ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
 **5. Rodar migrações**
@@ -117,6 +117,30 @@ python manage.py createsuperuser
 ```bash
 python manage.py runserver
 ```
+
+### 🖥️ Frontend
+
+O frontend React está na pasta `frontend/` e usa o proxy do Vite para acessar a API
+local. Com a API em execução, abra outro terminal na raiz do repositório:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Abra o endereço indicado pelo Vite (normalmente `http://localhost:5173`). Para gerar
+os arquivos de produção, execute `npm run build`; o resultado fica em `frontend/dist/`.
+Ao hospedar frontend e API em domínios diferentes, configure `VITE_API_BASE_URL` com
+a origem da API e habilite essa origem na política CORS do serviço da API.
+
+Para produção, mantenha `DEBUG=False`, use uma `SECRET_KEY` forte e configure
+`ALLOWED_HOSTS`. Se frontend e API estiverem em domínios distintos, configure
+`CORS_ALLOWED_ORIGINS` com as origens exatas do frontend. Em hospedagens com proxy
+HTTPS confiável (como o Render), configure `TRUST_X_FORWARDED_PROTO=True` e
+`SECURE_SSL_REDIRECT=True`; habilite HSTS (`SECURE_HSTS_SECONDS`) apenas depois de
+confirmar que todo o domínio funciona exclusivamente em HTTPS. As opções e exemplos
+estão em `API_GASTO/.env.example`.
 
 ---
 
