@@ -1,0 +1,30 @@
+# Local environment variables (keep the example file in Git).
+.env
+.env.*
+!.env.example
+
+# Virtual environments.
+.venv/
+.venv-*/
+venv/
+env/
+
+# Local databases and uploaded files.
+db.sqlite3
+db.sqlite3-*
+*.sqlite3
+*.sqlite3-journal
+media/
+
+# Python cache and test artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Django collected static files and logs.
+staticfiles/
+*.log
