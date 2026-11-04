@@ -45,31 +45,6 @@ Permite registrar entradas e saídas, calcular saldo automaticamente, filtrar tr
 
 ---
 
-## 🌐 Testando em Produção
-
-A API está disponível em produção. Para testar sem instalar nada:
-
-**1. Criar conta**
-```
-POST https://api-de-gestao-financeira.onrender.com/api/register/
-Body: { "username": "seu_usuario", "password": "sua_senha" }
-```
-
-**2. Fazer login e obter token**
-```
-POST https://api-de-gestao-financeira.onrender.com/api/token/
-Body: { "username": "seu_usuario", "password": "sua_senha" }
-```
-
-**3. Usar o token nas requisições**
-```
-Authorization: Bearer <token_recebido>
-```
-
-> ⚠️ A instância gratuita do Render pode demorar até 50 segundos para responder após período de inatividade.
-
----
-
 ## ⚙️ Como rodar localmente
 
 **1. Clonar o repositório**
