@@ -95,10 +95,6 @@ function AuthScreen({ onAuthenticated }) {
   const [error, setError] = useState('');
 
   async function submit(event) {
-    if (categories.length === 0) {
-    setError('É necessário criar uma categoria antes de registrar uma transação.');
-    return;
-  }
     event.preventDefault();
     setBusy(true);
     setError('');
