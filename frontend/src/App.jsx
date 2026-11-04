@@ -95,6 +95,10 @@ function AuthScreen({ onAuthenticated }) {
   const [error, setError] = useState('');
 
   async function submit(event) {
+    if (categories.length === 0) {
+    setError('É necessário criar uma categoria antes de registrar uma transação.');
+    return;
+  }
     event.preventDefault();
     setBusy(true);
     setError('');
@@ -162,7 +166,7 @@ function AuthScreen({ onAuthenticated }) {
   );
 }
 
-function Modal({ title, onClose, children, onSubmit, submitLabel = 'Salvar', busy }) {
+function Modal({ title, onClose, children, onSubmit, submitLabel = 'Salvar', busy, hideSubmit = false }) {
   return (
     <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -174,7 +178,7 @@ function Modal({ title, onClose, children, onSubmit, submitLabel = 'Salvar', bus
           <div className="modal-content">{children}</div>
           <div className="modal-actions">
             <button type="button" className="button button-quiet" onClick={onClose}>Cancelar</button>
-            <button className="button button-primary" disabled={busy}>{busy ? 'Salvando...' : submitLabel}</button>
+            {!hideSubmit && <button className="button button-primary" disabled={busy}>{busy ? 'Salvando...' : submitLabel}</button>}
           </div>
         </form>
       </section>
@@ -182,7 +186,7 @@ function Modal({ title, onClose, children, onSubmit, submitLabel = 'Salvar', bus
   );
 }
 
-function TransactionForm({ initial, categories, onSave, onClose }) {
+function TransactionForm({ initial, categories, onSave, onClose, onCreateCategory }) {
   const [form, setForm] = useState({
     nome: initial?.nome || '',
     valor: initial?.valor || '',
@@ -196,6 +200,7 @@ function TransactionForm({ initial, categories, onSave, onClose }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (categories.length === 0) return;
     setBusy(true);
     setError('');
     try {
@@ -209,23 +214,39 @@ function TransactionForm({ initial, categories, onSave, onClose }) {
   }
 
   return (
-    <Modal title={editing ? 'Editar transação' : 'Nova transação'} onClose={onClose} onSubmit={submit} submitLabel={editing ? 'Salvar alterações' : 'Adicionar transação'} busy={busy}>
-      <div className="type-toggle" role="group" aria-label="Tipo da transação">
-        <button type="button" className={form.tipo === 'saida' ? 'selected expense' : ''} onClick={() => setForm({ ...form, tipo: 'saida' })}><Icon name="down" size={17} /> Despesa</button>
-        <button type="button" className={form.tipo === 'entrada' ? 'selected income' : ''} onClick={() => setForm({ ...form, tipo: 'entrada' })}><Icon name="up" size={17} /> Receita</button>
-      </div>
-      <div className="form-grid">
-        <label className="field-wide">Descrição<input autoFocus minLength="3" maxLength="50" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required placeholder="Ex.: Conta de luz" /></label>
-        <label>Valor (R$)<input type="number" step="0.01" min="1" value={form.valor} onChange={(event) => setForm({ ...form, valor: event.target.value })} required placeholder="0,00" /></label>
-        <label>Data<input type="date" max={toDateInput(new Date())} value={form.data} onChange={(event) => setForm({ ...form, data: event.target.value })} required /></label>
-        <label className="field-wide">Categoria
-          <select value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} required>
-            <option value="">Selecione uma categoria</option>
-            {categories.map((category) => <option key={category.id} value={category.id}>{category.nome}</option>)}
-          </select>
-        </label>
-      </div>
-      {error && <div className="form-error" role="alert">{error}</div>}
+    <Modal
+      title={editing ? 'Editar transação' : 'Nova transação'}
+      onClose={onClose}
+      onSubmit={submit}
+      submitLabel={editing ? 'Salvar alterações' : 'Adicionar transação'}
+      busy={busy}
+      hideSubmit={categories.length === 0}
+    >
+      {categories.length === 0 ? (
+        <div className="category-empty">
+          <p role="alert">É necessário criar uma categoria antes de registrar uma transação.</p>
+          <button type="button" className="button button-primary" onClick={onCreateCategory}>Ir para categorias</button>
+        </div>
+      ) : (
+        <>
+          <div className="type-toggle" role="group" aria-label="Tipo da transação">
+            <button type="button" className={form.tipo === 'saida' ? 'selected expense' : ''} onClick={() => setForm({ ...form, tipo: 'saida' })}><Icon name="down" size={17} /> Despesa</button>
+            <button type="button" className={form.tipo === 'entrada' ? 'selected income' : ''} onClick={() => setForm({ ...form, tipo: 'entrada' })}><Icon name="up" size={17} /> Receita</button>
+          </div>
+          <div className="form-grid">
+            <label className="field-wide">Descrição<input autoFocus minLength="3" maxLength="50" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required placeholder="Ex.: Conta de luz" /></label>
+            <label>Valor (R$)<input type="number" step="0.01" min="1" value={form.valor} onChange={(event) => setForm({ ...form, valor: event.target.value })} required placeholder="0,00" /></label>
+            <label>Data<input type="date" max={toDateInput(new Date())} value={form.data} onChange={(event) => setForm({ ...form, data: event.target.value })} required /></label>
+            <label className="field-wide">Categoria
+              <select value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} required>
+                <option value="">Selecione uma categoria</option>
+                {categories.map((category) => <option key={category.id} value={category.id}>{category.nome}</option>)}
+              </select>
+            </label>
+          </div>
+          {error && <div className="form-error" role="alert">{error}</div>}
+        </>
+      )}
     </Modal>
   );
 }
@@ -439,7 +460,7 @@ function App() {
             <>
               <section className="page-heading heading-row">
                 <div><span className="eyebrow">SEU RESUMO FINANCEIRO</span><h1>Bom dia, {username} <span className="wave">✦</span></h1><p>Veja como está o seu dinheiro neste período.</p></div>
-                <button className="button button-primary" onClick={() => setTransactionModal({})}><Icon name="plus" size={18} /> Nova transação</button>
+                <button className="button button-primary" disabled={loading} onClick={() => setTransactionModal({})}><Icon name="plus" size={18} /> Nova transação</button>
               </section>
               <div className="period-filter">
                 <span>Período</span>
@@ -540,8 +561,7 @@ function App() {
           )}
         </div>
       </main>
-      {transactionModal && <TransactionForm initial={transactionModal} categories={categories} onClose={() => setTransactionModal(null)} onSave={saveTransaction} />}
-      {categories.length === 0 && ( <div className="form-error" role="alert">  É necessário criar uma categoria na aba Categorias antes de registrar uma transação. </div>)}
+      {transactionModal && <TransactionForm initial={transactionModal} categories={categories} onClose={() => setTransactionModal(null)} onSave={saveTransaction} onCreateCategory={() => { setTransactionModal(null); setActivePage('categories'); }} />}
       {categoryModal && <CategoryForm initial={categoryModal.id ? categoryModal : null} onClose={() => setCategoryModal(null)} onSave={saveCategory} />}
       {toast && <div className="toast" role="status"><span>✓</span>{toast}</div>}
     </div>
